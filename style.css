@@ -1,0 +1,182 @@
+@font-face {
+    font-family: 'esqadero';
+    src: url('/static/fonts/esqadero/esqaderoffcy4f.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'sf';
+    src: url('/static/fonts/sf/SFProDisplay-Light.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    margin: 0;
+    background-color: #b9b7b7;
+    overflow: hidden;
+}
+
+#mytextarea{
+    font-size: 13px;
+}
+
+#container {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    margin-top: 50px;
+    margin-right: 325px;
+}
+
+#mainContent {
+    display: flex;
+    width: 100%;
+    flex: 1;
+}
+
+
+.CodeMirror {
+    margin-top: 5px;
+    border: 1.5px solid #000000;
+    font-size: 13px;
+    width: calc(100% - 20px);
+    height: 500px;
+    padding: 0;
+}
+
+
+
+
+#buttonsBar {
+    width: calc(100% - 20px);
+    border: 1.5px solid #000000;
+    background-color: white;
+    height: 60px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+
+#rightSideBar {
+    width: 300px; /* Ширина боковой панели */
+    height: calc(100vh - 132px); /* Высота боковой панели с учетом отступов сверху и снизу */
+    border: 1.5px solid #000000;
+    padding: 10px;
+    background-color: white;
+    font-family: 'sf', SFProDisplay-Light;
+    position: fixed;
+    top: 40px; /* Отступ сверху, чтобы не перекрывать верхнюю панель */
+    right: 0;
+    overflow-y: auto;
+    margin-top: 15px;
+    margin-right: 7px;
+}
+
+#resultContainer {
+    width: calc(100% - 30px);
+    height: calc(100% - 593px);
+    border: 1.5px solid #000000;
+    padding: 5px;
+    font-size: 16px;
+    background-color: white;
+    font-family: 'sf', SFProDisplay-Light;
+    overflow-y: auto;
+}
+
+
+
+#topBar {
+    position: fixed;
+    background-color: #0400ff;
+    height: 40px;
+    width: 100%;
+    color: white;
+    text-align: center;
+    font-size: 26px;
+    font-family: 'esqadero', esqaderoffcy4f;
+    line-height: 40px;
+}
+
+#scriptsBar {
+    width: calc(100% - 30px);
+    margin-top: 5px;
+    height: 30px;
+    border: 1.5px solid #000000;
+    padding: 5px;
+    font-size: 20px;
+    background-color: white;
+}
+
+#bottomBar {
+    position: fixed;
+    bottom: 0;
+    background-color: #0400ff;
+    height: 40px;
+    width: 100%;
+    color: white;
+    text-align: left;
+    font-size: 26px;
+    font-family: 'esqadero', esqaderoffcy4f;
+    line-height: 40px;
+}
+
+
+#sriptName {
+    padding: 15px 30px;
+    background-color: #0400ff;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: 'sf', SFProDisplay-Light;
+}
+
+.sqlFiles {
+    border: 1px solid #626262;
+    padding: 2px 30px;
+    background-color: #626262;
+    margin-right: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: 'sf', SFProDisplay-Light;
+}
+
+
+lottie-player {
+    filter: hue-rotate(310deg) saturate(700%);
+    width: calc(100% - 100px);
+    height: calc(100% - 100px);
+    margin:auto;
+    margin-left: -50px;
+    margin-top: 25px;
+}
+
+.no-data {
+    margin-top: -280px;
+    width: calc(100% - 50px);
+    margin-left: 310px;
+    font-size: 75px;
+    color: red; /* По желанию */
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+    display: none;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
