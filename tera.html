@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+
+        @font-face {
+            font-family: 'sf';
+            src: url('/SFProDisplay-Light.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            background-color: #b9b7b7;
+            overflow: hidden;
+        }
+        #container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            margin-top: 50px;
+        }
+
+        .CodeMirror {
+            margin-top: 5px;
+            border: 1.5px solid #000000;
+            font-size: 13px;
+            width: calc(100% - 20px);
+            height: 500px;
+            padding: 0;
+        }
+
+        #buttonsBar {
+            width: calc(100% - 20px);
+            border: 1.5px solid #000000;
+            background-color: white;
+            height: 60px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        #resultContainer {
+            width: calc(100% - 30px);
+            height: calc(100% - 553px);
+            border: 1.5px solid #000000;
+            padding: 5px;
+            font-size: 16px;
+            background-color: white;
+            font-family: 'sf', SFProDisplay-Light;
+            overflow-y: auto;
+        }
+        #topBar {
+            position: fixed;
+            background-color: #0400ff;
+            height: 40px;
+            width: 100%;
+            color: white;
+            text-align: center;
+            font-size: 26px;
+            font-family: 'esqadero', esqaderoffcy4f;
+            line-height: 40px;
+        }
+
+
+        #bottomBar {
+            position: fixed;
+            bottom: 0;
+            background-color: #0400ff;
+            height: 40px;
+            width: 100%;
+            color: white;
+            text-align: left;
+            font-size: 26px;
+            font-family: 'esqadero', esqaderoffcy4f;
+            line-height: 40px;
+        }
+
+
+
+        lottie-player {
+            filter: hue-rotate(310deg) saturate(700%);
+            width: calc(100% - 100px);
+            height: calc(100% - 100px);
+            margin: auto;
+            margin-left: -50px;
+            margin-top: 25px;
+        }
+
+        .no-data {
+            margin-top: -280px;
+            width: calc(100% - 50px);
+            margin-left: 310px;
+            font-size: 75px;
+            color: red; /* По желанию */
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Стили из buttons.css */
+        .blueButton {
+            padding: 10px 40px;
+            border: 1px solid #0400ff;
+            background-color: #0400ff;
+            margin-right: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'sf', SFProDisplay-Light;
+        }
+
+
+        #clearButton {
+            padding: 10px 40px;
+            border: 1px solid #FF8C00;
+            background-color: #FF8C00;
+            margin-right: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'sf', SFProDisplay-Light;
+        }
+
+        #fontsizeplus {
+            padding: 10px 40px;
+            border: 1px solid #00b981;
+            background-color: #00b981;
+            margin-right: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'sf', SFProDisplay-Light;
+        }
+
+        #fontsizeminus {
+            padding: 10px 40px;
+            border: 1px solid #00b981;
+            background-color: #00b981;
+            margin-right: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'sf', SFProDisplay-Light;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/sql/sql.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+    <div id="topBar">
+        <span>CQL CENTER</span>
+    </div>
+
+    <div id="rightSideBar"> </div>
+    <div id="container">
+        <div id="scriptsBar"></div>
+        <textarea id="mytextarea"></textarea>
+
+        <div id="buttonsBar">
+            <button id="fontsizeplus" class="blueButton">+</button>
+            <button id="fontsizeminus" class="blueButton">-</button>
+            <button id="clearButton" class="blueButton">CLEAR</button>
+            <button id="executeButton" class="blueButton">EXECUTE CQL</button>
+        </div>
+
+        <div id="resultContainer">
+            <table id="data-table">
+                <thead>
+                    <tr></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="bottomBar">
+        <span></span>
+    </div>
+
+<script>
+
+  var editor; // Объявление переменной editor на верхнем уровне
+document.addEventListener("DOMContentLoaded", function() {
+
+    var inputText = document.getElementById('mytextarea');
+    editor = CodeMirror.fromTextArea(inputText, {
+        mode: 'text/x-sql',
+        lineNumbers: true,
+        theme:'default',
+        autofocus : true,
+        autocapitalize : true
+    });
+    var parentWidth = document.getElementById('container').offsetWidth;
+    editor.setSize("", 350)
+
+
+
+
+    // Скрываем элемент textarea
+    inputText.style.display = "none";
+
+    // При загрузке DOM выполняем подписку на событие click
+    document.getElementById("executeButton").addEventListener('click', function() {
+        var textAboveCursor = getTextAboveCursorPosition(editor);
+        sendDataToServer(textAboveCursor);
+        console.log(textAboveCursor);
+    });
+    document.getElementById("saveButton").addEventListener('click', function() {
+        saveContentToFile(editor);
+    });
+
+    document.getElementById("clearButton").addEventListener('click', function() {
+        clearEditor(editor);
+    });
+
+    document.getElementById("fontsizeplus").addEventListener('click', function() {
+    increaseFontSize();
+    });
+
+    document.getElementById("fontsizeminus").addEventListener('click', function() {
+    decreaseFontSize();
+    });
+
+
+    document.getElementById('deleteButton').addEventListener('click', function() {
+    // Получаем имя подсвеченного файла
+    var highlightedButton = document.querySelector('.sqlFiles.highlighted');
+    console.log('DELETING')
+    console.log(highlightedButton)
+    if (highlightedButton) {
+        var fileName = highlightedButton.textContent;
+        // Вызываем функцию удаления файла
+        deleteFile(fileName,editor);
+    }
+    });
+
+    // Добавляем обработчик события keydown
+    document.addEventListener('keydown', function(event) {
+        // Проверяем нажатие Command + Enter
+        if (event.metaKey && event.key === 'Enter') {
+            event.preventDefault(); // Предотвращаем действие по умолчанию (вставку новой строки)
+            var textAboveCursor = getTextAboveCursorPosition(editor);
+            sendDataToServer(textAboveCursor);
+        }
+    });
+
+    fetch('/saved_files')
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Ошибка при получении файлов.');
+        }
+    })
+    .then(data => {
+        // Перебираем файлы и вызываем placeFileNamesOnBar для каждого из них
+        data.result.forEach(fileName => {
+            placeFileNamesOnBar(fileName);
+        });
+    })
+    .catch(error => {
+        console.error('Произошла ошибка:', error);
+    });
+
+});
+
+function sendDataToServer(data) {
+    const container = document.getElementById('resultContainer');
+    const animation = `
+                <lottie-player id="loading-animation"
+                               src="https://lottie.host/8b8f293b-8e57-4916-b636-d4fdeb568271/F0hChViYKH.json"
+                               background="##FFFFFF"
+                               speed="2"
+                               loop
+                               autoplay
+                               direction="1"
+                               mode="normal"
+                               style="width: 500px;calc(100% - 50px); display: block; margin: auto;margin-top: 100px;filter:hue-rotate(20deg) saturate(200%);">
+                </lottie-player>`
+
+    if (data !== undefined && data !== null)
+    {
+        container.innerHTML=animation;
+        fetch('http://127.0.0.1:8000/api/v1/sql_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: data })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(responseData => {
+            try {
+                const objectsArray = responseData.result.split('\n').filter(Boolean);
+                const parsedResults = objectsArray.map(objStr => JSON.parse(objStr.trim()));
+                console.log(parsedResults)
+                buildTableFromJSON(parsedResults);
+            } catch (error) {
+                displayDataInContainer(responseData);
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        })
+        .finally(() => {
+            // Скрываем анимацию
+            // animation.style.display = 'none';
+        });
+    } else {
+        console.error('Data is undefined or null');
+    }
+}
+
+
+
+
+function buildTableFromJSON(jsonData) {
+    const container = document.getElementById('resultContainer');
+    const table = document.createElement('table');
+    table.style.borderCollapse = 'collapse'; // Установка свойства border-collapse для объединения границ ячеек
+    table.style.width = '100%'; // Задаем таблице ширину 100%
+    table.style.maxWidth = '100%'; // Задаем максимальную ширину таблицы, чтобы она не выходила за пределы контейнера
+    table.style.height = '20%'
+    table.style.overflow = 'auto'; // Добавляем полосы прокрутки при необходимости
+
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+
+    // Получаем ключи первого объекта для создания заголовков
+    const keys = Object.keys(jsonData[0]);
+
+    // Создаем заголовки таблицы
+    const headerRow = document.createElement('tr');
+    keys.forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = key;
+        th.style.border = '1px solid black'; // Добавляем границы к заголовкам
+        th.style.padding = '8px';
+        th.style.backgroundColor = '#ffffdd';
+        th.style.textAlign = 'left';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Создаем строки таблицы
+    jsonData.forEach(obj => {
+        const row = document.createElement('tr');
+        keys.forEach(key => {
+            const td = document.createElement('td');
+            // Проверяем, является ли значение объектом, и преобразуем его в строку JSON
+            td.textContent = typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : obj[key];
+            td.style.border = '1px solid black'; // Добавляем границы к ячейкам
+            td.style.backgroundColor='#FFFFFF'
+            td.style.padding = '8px';
+            row.appendChild(td);
+        });
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    // Очищаем контейнер и добавляем таблицу
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+
+
+function displayDataInContainer(data) {
+     const resultContainer = document.getElementById('resultContainer');
+     resultContainer.style.fontSize="16px";
+     resultContainer.innerText = data.result;
+     if (data.result === "NO DATA!") {
+            resultContainer.innerHTML =`
+        <lottie-player
+            src="https://lottie.host/ffa4d90c-fd16-40db-848b-4e8198196815/z576vMjKU5.json"
+            background="#FFFFFF"
+            speed="2"
+            autoplay
+            direction="1"
+            mode="normal">
+        </lottie-player>
+        <div class="no-data">NO DATA IN TABLE!</div>`;
+    } else {
+        resultContainer.innerText = data.result;
+    }
+}
+
+function getTextAboveCursorPosition(editor) {
+    if (editor && editor.getValue().trim() !== '') {
+        var text = editor.getValue();
+        var cursorPos = editor.getCursor(); // Получаем позицию курсора
+        var lineStart = cursorPos.line; // Номер строки, где находится курсор
+        var result = "";
+
+        // Пока не дошли до начала текста
+        while (lineStart >= 0) {
+            var lineText = editor.getLine(lineStart); // Получаем текст текущей строки
+            // Если текущая строка содержит SQL-запрос, добавляем его к результату
+            if (lineText.trim() !== '') {
+                result = lineText + '\n' + result;
+            } else {
+                // Если строка пустая, значит это конец предыдущего запроса, завершаем цикл
+                break;
+            }
+            lineStart--; // Переходим к предыдущей строке
+        }
+
+        return result.trim(); // Удаляем возможные лишние пробелы и возвращаем результат
+    } else {
+        return "";
+    }
+}
+
+
+function getCursorPosition(editor) {
+    return editor.getCursor().ch;
+}
+
+// Функция размещения имени файла на панели
+function placeFileNamesOnBar(fileName) {
+    var scriptsBar = document.getElementById('scriptsBar');
+    var button = document.createElement('button');
+    button.textContent = fileName;
+    button.classList.add('sqlFiles');
+    button.addEventListener('click', function() {
+        // Очищаем подсветку у всех кнопок
+        var buttons = document.querySelectorAll('.sqlFiles');
+        buttons.forEach(btn => {
+            btn.classList.remove('highlighted'); // Убираем класс highlighted у всех кнопок
+            btn.style.backgroundColor = '#626262'; // Убираем подсветку
+            btn.style.borderColor='#626262';
+        });
+
+        // Подсвечиваем текущую кнопку желтым цветом
+        button.classList.add('highlighted'); // Добавляем класс highlighted к текущей кнопке
+        button.style.backgroundColor = '#0400ff';
+        button.style.borderColor='#0400ff'
+
+        // Вызываем функцию отображения содержимого файла в редакторе
+        displayOnEditor(fileName, editor);
+    });
+
+    scriptsBar.appendChild(button);
+}
+
+
+
+
+
+async function setFileName(callback) {
+    // Создаем текстовое поле ввода
+    var inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.placeholder = 'Введите имя файла';
+
+    // Обработчик нажатия Enter
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            var fileName = inputField.value;
+            if (fileName) {
+                // Удаляем текстовое поле ввода
+                inputField.parentNode.removeChild(inputField);
+                // Вызываем функцию обратного вызова с именем файла в качестве аргумента
+                callback(fileName);
+                // Удаляем обработчик события
+                inputField.removeEventListener('keypress', handleEnter);
+            }
+        }
+    }
+
+    inputField.addEventListener('keypress', handleEnter);
+
+    // Вставляем текстовое поле ввода в #bottomBar
+    var bottomBar = document.getElementById('bottomBar');
+    bottomBar.appendChild(inputField);
+
+    // Ждем, пока пользователь введет имя файла
+    await new Promise(resolve => {
+        inputField.addEventListener('keypress', handleEnter);
+    });
+}
+
+// Пример использования функции setFileName
+async function saveContentToFile(editor) {
+    // Ждем, пока пользователь введет имя файла
+    await setFileName(async function(fileName) {
+        var text = editor.getValue();
+        // Отправляем содержимое на сервер по адресу /save_file/{file_name}
+        try {
+            const response = await fetch(`/save_file/${fileName}`, {
+                method: 'POST',
+                body: JSON.stringify({ content: text }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                console.log('Содержимое успешно сохранено в файл.');
+                placeFileNamesOnBar(fileName);
+            } else {
+                console.error('Ошибка при сохранении содержимого в файл.');
+            }
+        } catch (error) {
+            console.error('Произошла ошибка:', error);
+        }
+    });
+}
+
+
+
+
+
+function deleteFile(fileName,editor) {
+    // Отправляем запрос на сервер для удаления файла
+    fetch(`/save_file/${fileName}`, {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (response.ok) {
+            // Удаляем кнопку из DOM
+            var button = document.querySelector('.highlighted'); // Находим подсвеченную кнопку
+            if (button) {
+                button.parentNode.removeChild(button);
+                clearEditor(editor)
+                console.log(`Файл ${fileName} удален успешно.`);
+            }
+        } else {
+            console.error(`Ошибка при удалении файла ${fileName}.`);
+        }
+    })
+    .catch(error => {
+        console.error('Произошла ошибка:', error);
+    });
+}
+
+
+
+
+function displayOnEditor(fileName,editor) {
+    // Очищаем содержимое редактора
+    // Вставляем содержимое файла в редактор
+    fetch(`/save_file/${fileName}`)
+    .then(response => response.text())
+    .then(text => {
+        editor.setValue(text);
+    })
+    .catch(error => {
+        console.error('Произошла ошибка:', error);
+    });
+}
+
+
+function clearEditor(editor) {
+    editor.setValue(''); // Очищаем содержимое редактора
+}
+
+function changeFontSize(delta) {
+    const codemirrorElements = document.getElementsByClassName("CodeMirror");
+    const textarea = document.getElementById("mytextarea")
+    for (let i = 0; i < codemirrorElements.length; i++) {
+        // Получаем текущий размер шрифта
+        let currentFontSize = parseInt(codemirrorElements[i].style.fontSize) || 13;
+        let currentFontSize2 = 13;
+        // Изменяем размер шрифта на заданный дельта (delta)
+        let newFontSize = currentFontSize + delta;
+        let newFontSize2 = currentFontSize + delta;
+        // Применяем новый размер шрифта к элементу
+        codemirrorElements[i].style.fontSize = newFontSize + "px";
+        textarea.style.fontSize = newFontSize2 + "px";
+    }
+}
+
+function increaseFontSize() {
+    changeFontSize(1); // Увеличиваем размер шрифта на 1 пиксель
+}
+
+function decreaseFontSize() {
+    changeFontSize(-1); // Уменьшаем размер шрифта на 1 пиксель
+}
+
+</script>
+
+</body>
+</html>
+
